@@ -1,216 +1,152 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Goolag</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-      body, figure, a, div {
-        margin: 0;
-        padding: 0;
-        -ms-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        border-color: inherit;
-        /* font */
-        font-family: 'Kanit', sans-serif;
-      }
-      html, body {
-        /* สีพื้นหลัง */
-        background-color: #000;
-        overflow: hidden;
-        position: relative;
-        width: 100%;
-        height: 100%;
-      }
-      figure a {
-        width: 100%;
-        height: 100%;
-        float: left;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        border-width: 1px;
-        border-style: solid;
-        -webkit-transition: all 1s ease-out;
-        -moz-transition: all 1s ease-out;
-        -ms-transition: all 1s ease-out;
-        transition: all 1s ease-out;
-        /* ถ้ามีการเปลี่ยนขนาดของรูปภาพ ควรเปลี่ยนตัวเลข 100 เป็นครึ่งหนึ่งของขนาดรูปภาพด้วย */
-        box-shadow: 0 0 100px 100px rgba(0,0,0,0.7) inset;
-        -moz-box-shadow: 0 0 100px 100px rgba(0,0,0,0.7) inset;
-        -webkit-box-shadow: 0 0 100px 100px rgba(0,0,0,0.7) inset;
-      }
-      figure a:hover {
-        box-shadow: none;
-        -moz-box-shadow: none;
-        -ms-box-shadow: none;
-        -webkit-box-shadow: none;
-      }
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goolag</title>
+  <link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet">
+  <style>
+    body, figure, a, div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Kanit', sans-serif;
+    }
+    html, body {
+      background-color: #000;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    #warper {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #000;
+    }
+    figure {
+      margin: 0;
+      flex: 1 0 10%;
+      aspect-ratio: 1/1;
+    }
+    figure a {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-position: center;
+      background-size: cover;
+      border: 1px solid #000;
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.7);
+      transition: box-shadow 0.5s ease;
+    }
+    figure a:hover {
+      box-shadow: none;
+    }
+    .preview {
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%;
+      height: 100%;
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-color: rgba(0,0,0,0.9);
+      display: none;
+      cursor: zoom-out;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+    }
+    .next {
+      z-index: 20;
+      color: #fff;
+      position: absolute;
+      right: 2em;
+      bottom: 2em;
+      font-size: 2em;
+      text-decoration: none;
+      background-color: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 0.5em 1em;
+      transition: background-color 0.5s ease;
+    }
+    .next:hover {
+      background-color: rgba(0,0,0,0.7);
+    }
+    @media (max-width: 600px) {
       figure {
-        float: left;
-        display: inline-block;
+        flex: 1 0 25%;
       }
-      #warper {
-        position: relative;
-        overflow: hidden;
-        border-width: 1px;
-        border-style: solid;
-        /* สีกรอบรูป */
-        border-color: #000;
-      }
-      .preview {
-        left: 0;
-        top: 0;
-        width: 0;
-        height: 0;
-        position: fixed;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
-        -webkit-transition: all 0.5s ease-out;
-        -moz-transition: all 0.5s ease-out;
-        -ms-transition: all 0.5s ease-out;
-        transition: all 0.5s ease-out;
-      }
-      /* ข้อความลิงค์ไปหน้าหลัก */
       .next {
-        z-index: 1;
-        color: #FFF;
-        position: absolute;
-        right: 2em;
-        bottom: 2em;
-        font-size: 2em;
-        text-decoration: none;
-        background-color: rgba(0,0,0,0.2);
-        border-radius: 5px;
-        -moz-border-radius: 5px;
-        -webkit-border-radius: 5px;
-        padding: 0.5em 1em;
-        -webkit-transition: background-color 0.5s ease-out;
-        -moz-transition: background-color 0.5s ease-out;
-        -ms-transition: background-color 0.5s ease-out;
-        transition: background-color 0.5s ease-out;
+        right: 1em;
+        bottom: 1em;
+        font-size: 1.5em;
       }
-      .next:hover {
-        background-color: rgba(0,0,0,0.7);
-      }
-      /* iphone and small device */
-      @media only screen and (max-width: 480px) {
-        .next {
-          right: 10px;
-          bottom: 10px;
-          font-size: 1.5em;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="body">
-      <div id="warper">
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/0.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/1.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/2.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/3.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/4.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/5.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/6.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/7.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/8.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/9.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/10.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/11.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/12.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/13.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/14.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/15.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/16.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/17.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/18.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/19.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/20.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/21.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/22.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/23.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/24.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/25.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/26.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/27.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/28.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/29.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/30.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/31.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/32.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/33.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/34.jpg)"></a></figure>
-        <figure><a style="background-image:url(https://bestcommt2.github.io/img/35.jpg)"></a></figure>
-      </div>
-    </div>
-    <!-- ระบุ URL และหน้าที่ต้องการ เช่น index.php -->
-    <a class=next href="https://bestcommt2.github.io/Login.html">เข้าสู่เว็บไซต์...</a>
-    <script src="gajax.js"></script>
-    <script>
-      /* ขนาดรูปเล็กสูงสุด */
-      var thumb_width = 200;
-      /* จำนวนแถวของรูปภาพ */
-      var rows = 4;
-      /* slide show */
-      var drag = false,
-        warper = $G('warper'),
-        images = warper.elems('a'),
-        cols = Math.floor(images.length / rows),
-        figure_height = (100 / rows) + '%',
-        figure_width = (100 / cols) + '%',
-        ch = document.viewport.getHeight(),
-        cw = document.viewport.getWidth(),
-        w = (thumb_width * cols) * ch / (thumb_width * rows);
-      warper.style.height = ch + 'px';
-      warper.style.width = w + 'px';
-      warper.style.left = ((cw - w) / 2) + 'px';
-      var preview = $G(document.body).create('div');
-      preview.className = 'preview';
-      preview.style.left = (cw / 2) + 'px';
-      preview.style.top = (ch / 2) + 'px';
-      preview.setStyle('opacity', 0);
-      forEach(warper.elems('figure'), function () {
-        this.style.height = figure_height;
-        this.style.width = figure_width;
+    }
+  </style>
+</head>
+<body>
+  <div id="warper"></div>
+
+  <a class="next" href="https://bestcommt2.github.io/Login.html">เข้าสู่เว็บไซต์...</a>
+  <div class="preview" id="preview"></div>
+
+  <script>
+    const warper = document.getElementById('warper');
+    const preview = document.getElementById('preview');
+
+    // 🔹 จำนวนรูปภาพ
+    const imageCount = 36;
+    const imageBase = "https://bestcommt2.github.io/img/";
+
+    // 🔹 สร้างรูปภาพทั้งหมด
+    for (let i = 0; i < imageCount; i++) {
+      const fig = document.createElement('figure');
+      const link = document.createElement('a');
+      link.style.backgroundImage = `url(${imageBase + i}.jpg)`;
+      fig.appendChild(link);
+      warper.appendChild(fig);
+
+      // คลิกเพื่อเปิดภาพใหญ่
+      link.addEventListener('click', () => {
+        preview.style.backgroundImage = `url(${imageBase + i}.jpg)`;
+        preview.style.display = 'block';
+        preview.style.opacity = '1';
       });
-      preview.addEvent("mouseup", function (e) {
-        this.style.left = (cw / 2) + 'px';
-        this.style.top = (ch / 2) + 'px';
-        this.style.width = 0;
-        this.style.height = 0;
-        preview.setStyle('opacity', 0);
-      });
-      var doClick = function (e) {
-        if (!drag) {
-          var hs = /url\(["'"](.*)["'"]\)/.exec(this.getStyle('backgroundImage'));
-          if (hs) {
-            preview.setStyle('backgroundImage', 'url(' + hs[1] + ')');
-            preview.style.left = 0;
-            preview.style.top = 0;
-            preview.style.width = cw + 'px';
-            preview.style.height = ch + 'px';
-            preview.setStyle('opacity', 1);
-          }
-        }
-      };
-      forEach(images, function () {
-        $G(this).addEvent("mouseup", doClick);
-      });
-      new GDragMove('warper', 'body', {
-        moveDrag: function () {
-          drag = true;
-          return true;
-        },
-        endDrag: function () {
-          drag = false;
-          return true;
-        }
-      });
-    </script>
-    <link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet">
-  </body>
+    }
+
+    // 🔹 คลิกที่ preview เพื่อปิด
+    preview.addEventListener('click', () => {
+      preview.style.opacity = '0';
+      setTimeout(() => preview.style.display = 'none', 300);
+    });
+
+    // 🔹 Drag เพื่อเลื่อนภาพใน gallery
+    let isDown = false;
+    let startX, scrollLeft;
+    warper.style.overflowX = 'auto';
+    warper.style.cursor = 'grab';
+
+    warper.addEventListener('mousedown', e => {
+      isDown = true;
+      startX = e.pageX - warper.offsetLeft;
+      scrollLeft = warper.scrollLeft;
+      warper.style.cursor = 'grabbing';
+    });
+
+    warper.addEventListener('mouseleave', () => { isDown = false; });
+    warper.addEventListener('mouseup', () => {
+      isDown = false;
+      warper.style.cursor = 'grab';
+    });
+    warper.addEventListener('mousemove', e => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - warper.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      warper.scrollLeft = scrollLeft - walk;
+    });
+  </script>
+</body>
 </html>
