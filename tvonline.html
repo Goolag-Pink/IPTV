@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IPTV Plus</title>
+  <style>
+    body{margin:0;background:#000;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;}
+    video{width:90%;max-width:800px;border-radius:10px;}
+    button{margin-top:20px;padding:10px 20px;background:#ef4444;border:none;color:#fff;border-radius:8px;cursor:pointer;}
+  </style>
+</head>
+<body>
+  <video controls autoplay>
+    <source src="https://example.com/iptv/stream.m3u8" type="application/x-mpegURL">
+    ไม่สามารถโหลดวิดีโอได้
+  </video>
+  <button onclick="logout()">ออกจากระบบ</button>
+
+  <script type="module">
+    import { auth } from "./firebaseConfig.js";
+    import { signOut, onAuthStateChanged } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    onAuthStateChanged(auth, user => {
+      if(!user){
+        window.location.href = "index.html";
+      }
+    });
+
+    function logout(){
+      signOut(auth).then(()=>window.location.href="index.html");
+    }
+  </script>
+</body>
+</html>
