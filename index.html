@@ -1,152 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Goolag</title>
-  <link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>เข้าสู่ระบบ IPTV Plus</title>
   <style>
-    body, figure, a, div {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Kanit', sans-serif;
+    :root{
+      --bg1:#0f172a; --bg2:#0b1220;
+      --accent1:#7c3aed; --accent2:#06b6d4;
+      --muted:rgba(255,255,255,0.7);
+      --error:#ef4444; --success:#10b981;
     }
-    html, body {
-      background-color: #000;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
+    *{box-sizing:border-box}
+    body{
+      margin:0;display:grid;place-items:center;height:100vh;
+      font-family:Inter,Arial,sans-serif;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#fff;
     }
-    #warper {
-      position: relative;
-      display: flex;
-      flex-wrap: wrap;
-      width: 100%;
-      height: 100%;
-      border: 1px solid #000;
-    }
-    figure {
-      margin: 0;
-      flex: 1 0 10%;
-      aspect-ratio: 1/1;
-    }
-    figure a {
-      display: block;
-      width: 100%;
-      height: 100%;
-      background-position: center;
-      background-size: cover;
-      border: 1px solid #000;
-      box-shadow: inset 0 0 100px rgba(0,0,0,0.7);
-      transition: box-shadow 0.5s ease;
-    }
-    figure a:hover {
-      box-shadow: none;
-    }
-    .preview {
-      position: fixed;
-      left: 0; top: 0;
-      width: 100%;
-      height: 100%;
-      background-position: center;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-color: rgba(0,0,0,0.9);
-      display: none;
-      cursor: zoom-out;
-      z-index: 10;
-      transition: opacity 0.3s ease;
-    }
-    .next {
-      z-index: 20;
-      color: #fff;
-      position: absolute;
-      right: 2em;
-      bottom: 2em;
-      font-size: 2em;
-      text-decoration: none;
-      background-color: rgba(0,0,0,0.3);
-      border-radius: 8px;
-      padding: 0.5em 1em;
-      transition: background-color 0.5s ease;
-    }
-    .next:hover {
-      background-color: rgba(0,0,0,0.7);
-    }
-    @media (max-width: 600px) {
-      figure {
-        flex: 1 0 25%;
-      }
-      .next {
-        right: 1em;
-        bottom: 1em;
-        font-size: 1.5em;
-      }
-    }
+    .card{width:100%;max-width:400px;background:rgba(255,255,255,0.03);
+      border-radius:16px;padding:28px;box-shadow:0 10px 25px rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);}
+    h1{text-align:center;font-size:24px;margin:0 0 20px;}
+    label{display:block;margin-bottom:6px;font-size:14px;color:var(--muted);}
+    input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.05);color:#fff;font-size:15px;outline:none;}
+    input:focus{border-color:var(--accent1);box-shadow:0 0 0 2px rgba(124,58,237,0.4);}
+    .btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:15px;font-weight:600;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#fff;cursor:pointer;margin-top:8px;}
+    .switch{margin-top:12px;text-align:center;font-size:14px;color:var(--muted);}
+    .switch span{color:var(--accent2);cursor:pointer;}
+    .message{margin-top:12px;padding:12px;border-radius:10px;font-weight:600;font-size:14px;}
+    .message.error{background:rgba(239,68,68,0.12);color:var(--error);}
+    .message.success{background:rgba(16,185,129,0.12);color:var(--success);}
   </style>
 </head>
 <body>
-  <div id="warper"></div>
+  <div class="card">
+    <h1 id="formTitle">เข้าสู่ระบบ</h1>
+    <form id="authForm">
+      <label for="email">อีเมล</label>
+      <input id="email" type="email" placeholder="you@example.com" required>
 
-  <a class="next" href="https://bestcommt2.github.io/Login.html">เข้าสู่เว็บไซต์...</a>
-  <div class="preview" id="preview"></div>
+      <label for="password">รหัสผ่าน</label>
+      <input id="password" type="password" placeholder="••••••••" required>
 
-  <script>
-    const warper = document.getElementById('warper');
-    const preview = document.getElementById('preview');
+      <button class="btn" type="submit" id="submitBtn">เข้าสู่ระบบ</button>
+      <div id="msg"></div>
+    </form>
+    <div class="switch">
+      <span id="toggleForm">ยังไม่มีบัญชี? สมัครสมาชิก</span>
+    </div>
+  </div>
 
-    // 🔹 จำนวนรูปภาพ
-    const imageCount = 36;
-    const imageBase = "https://bestcommt2.github.io/img/";
+  <script type="module">
+    import { auth } from "./firebaseConfig.js";
+    import { signInWithEmailAndPassword, createUserWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    // 🔹 สร้างรูปภาพทั้งหมด
-    for (let i = 0; i < imageCount; i++) {
-      const fig = document.createElement('figure');
-      const link = document.createElement('a');
-      link.style.backgroundImage = `url(${imageBase + i}.jpg)`;
-      fig.appendChild(link);
-      warper.appendChild(fig);
+    const form = document.getElementById('authForm');
+    const msg = document.getElementById('msg');
+    const toggle = document.getElementById('toggleForm');
+    const title = document.getElementById('formTitle');
+    const btn = document.getElementById('submitBtn');
 
-      // คลิกเพื่อเปิดภาพใหญ่
-      link.addEventListener('click', () => {
-        preview.style.backgroundImage = `url(${imageBase + i}.jpg)`;
-        preview.style.display = 'block';
-        preview.style.opacity = '1';
-      });
+    let isLogin = true;
+
+    function showMessage(text, type){
+      msg.innerHTML = `<div class="message ${type}">${text}</div>`;
     }
 
-    // 🔹 คลิกที่ preview เพื่อปิด
-    preview.addEventListener('click', () => {
-      preview.style.opacity = '0';
-      setTimeout(() => preview.style.display = 'none', 300);
-    });
+    toggle.onclick = () => {
+      isLogin = !isLogin;
+      if(isLogin){
+        title.textContent = 'เข้าสู่ระบบ';
+        btn.textContent = 'เข้าสู่ระบบ';
+        toggle.innerHTML = 'ยังไม่มีบัญชี? <span>สมัครสมาชิก</span>';
+      }else{
+        title.textContent = 'สมัครสมาชิก';
+        btn.textContent = 'สมัครสมาชิก';
+        toggle.innerHTML = 'มีบัญชีแล้ว? <span>เข้าสู่ระบบ</span>';
+      }
+      msg.innerHTML = '';
+    }
 
-    // 🔹 Drag เพื่อเลื่อนภาพใน gallery
-    let isDown = false;
-    let startX, scrollLeft;
-    warper.style.overflowX = 'auto';
-    warper.style.cursor = 'grab';
-
-    warper.addEventListener('mousedown', e => {
-      isDown = true;
-      startX = e.pageX - warper.offsetLeft;
-      scrollLeft = warper.scrollLeft;
-      warper.style.cursor = 'grabbing';
-    });
-
-    warper.addEventListener('mouseleave', () => { isDown = false; });
-    warper.addEventListener('mouseup', () => {
-      isDown = false;
-      warper.style.cursor = 'grab';
-    });
-    warper.addEventListener('mousemove', e => {
-      if (!isDown) return;
+    form.onsubmit = async (e) => {
       e.preventDefault();
-      const x = e.pageX - warper.offsetLeft;
-      const walk = (x - startX) * 1.5;
-      warper.scrollLeft = scrollLeft - walk;
-    });
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      try{
+        if(isLogin){
+          await signInWithEmailAndPassword(auth, email, password);
+          showMessage('เข้าสู่ระบบสำเร็จ! กำลังนำทาง...','success');
+          setTimeout(()=>window.location.href='tvonline.html',1000);
+        }else{
+          await createUserWithEmailAndPassword(auth, email, password);
+          showMessage('สมัครสมาชิกสำเร็จ!','success');
+          setTimeout(()=>window.location.href='tvonline.html',1000);
+        }
+      }catch(err){
+        showMessage('เกิดข้อผิดพลาด: ' + err.message, 'error');
+      }
+    }
   </script>
 </body>
 </html>
