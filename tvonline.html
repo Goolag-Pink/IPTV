@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPTV Online</title>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600&display=swap" rel="stylesheet">
+  
   <script type="module">
-    // 🔒 ตรวจสอบล็อกอินจาก Firebase
+    // สมมติว่าไฟล์นี้อยู่ในระดับเดียวกับ Login.html และ firebaseConfig.js
     import { auth } from "./firebaseConfig.js";
     import { onAuthStateChanged, signOut } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
@@ -110,12 +111,24 @@
       flex: 1;
       background: black;
       display: flex;
+      flex-direction: column; /* ปรับเป็น column */
       align-items: center;
       justify-content: center;
       position: relative;
     }
 
-    video {
+    /* **ปรับปรุง: ให้ playerSlot ครอบคลุมพื้นที่ทั้งหมด** */
+    #playerSlot {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* **สไตล์สำหรับ Video และ Iframe ที่สร้างขึ้นใหม่** */
+    #playerSlot video,
+    #playerSlot iframe {
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -133,6 +146,7 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
+      z-index: 10; /* ให้ปุ่มอยู่ด้านบน */
     }
 
     @media (max-width: 768px) {
@@ -151,79 +165,132 @@
   <main>
     <aside id="sidebar">
       <div class="category">
-        <h3>ข่าว</h3>
-        <div class="channel" data-url="http://goolag.duckdns.org/now/index.m3u8">
-          <img src="https://i.imgur.com/VzQp0ek.png" alt="">
+        <h3>ข่าว (HLS)</h3>
+        <div class="channel" data-url="http://goolag.duckdns.org/now/index.m3u8" data-type="hls">
+          <img src="https://i.imgur.com/VzQp0ek.png" alt="Nows4 Logo">
           <span>Nows4</span>
         </div>
-        <div class="channel" data-url="http://goolag.duckdns.org/Bein1/index.m3u8">
-          <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Al_Jazeera_English_Logo.svg/1200px-Al_Jazeera_English_Logo.svg.png" alt="">
+        <div class="channel" data-url="http://goolag.duckdns.org/Bein1/index.m3u8" data-type="hls">
+          <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Al_Jazeera_English_Logo.svg/1200px-Al_Jazeera_English_Logo.svg.png" alt="Al Jazeera Logo">
           <span>Al Jazeera</span>
         </div>
       </div>
 
       <div class="category">
-        <h3>บันเทิง</h3>
-        <div class="channel" data-url="https://test-streams.mux.dev/test_001/stream.m3u8">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2b/Channel_3_Thailand_logo.svg" alt="">
-          <span>ช่อง 3</span>
+        <h3>บันเทิง (ผสม)</h3>
+        <div class="channel" data-url="https://test-streams.mux.dev/test_001/stream.m3u8" data-type="hls">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2b/Channel_3_Thailand_logo.svg" alt="Ch3 Logo">
+          <span>ช่อง 3 (HLS)</span>
         </div>
-        <div class="channel" data-url="https://test-streams.mux.dev/pts_003/stream.m3u8">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/f/fc/Channel_7_Thailand_Logo.png" alt="">
-          <span>ช่อง 7</span>
+        
+        <div class="channel" 
+             data-url="https://www.youtube.com/embed/jfB5p_w9m0U?autoplay=1&mute=1&controls=0" 
+             data-type="embed">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282017%29.png" alt="YouTube Logo">
+          <span>YouTube Embed</span>
         </div>
       </div>
 
       <div class="category">
-        <h3>กีฬา</h3>
-        <div class="channel" data-url="https://test-streams.mux.dev/dai-discontinuity-deltatre/manifest.m3u8">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/f/fb/TrueSport_logo.png" alt="">
+        <h3>กีฬา (HLS)</h3>
+        <div class="channel" data-url="https://test-streams.mux.dev/dai-discontinuity-deltatre/manifest.m3u8" data-type="hls">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/f/fb/TrueSport_logo.png" alt="True Sport Logo">
           <span>True Sport</span>
         </div>
       </div>
     </aside>
 
     <section id="playerContainer">
-      <video id="video" controls autoplay></video>
+      <div id="playerSlot"></div>
       <button id="fullscreenBtn">Full Screen</button>
     </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-    const video = document.getElementById("video");
     const channels = document.querySelectorAll(".channel");
     const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const playerSlot = document.getElementById("playerSlot"); // อ้างอิง player slot
 
-    function loadStream(url) {
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play();
-        });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = url;
-        video.play();
+    let currentHls = null; // เก็บ instance ของ Hls เพื่อจัดการหยุดการทำงาน
+
+    function loadStream(url, type) {
+      // 1. ล้างเนื้อหาเก่าและหยุด Hls เดิม
+      playerSlot.innerHTML = '';
+      if (currentHls) {
+          currentHls.destroy();
+          currentHls = null;
+      }
+      
+      // 2. จัดการการเล่นตามประเภท
+      if (type === 'embed') {
+          // **การเล่นแบบ Embed (iframe)**
+          const iframe = document.createElement('iframe');
+          iframe.src = url;
+          iframe.setAttribute('allowfullscreen', 'true');
+          iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = 'none';
+          iframe.id = 'embeddedPlayer';
+
+          playerSlot.appendChild(iframe);
+
+      } else {
+          // **การเล่นแบบ HLS (Video Player)**
+          const video = document.createElement('video');
+          video.id = 'video';
+          video.controls = true;
+          video.autoplay = true;
+
+          playerSlot.appendChild(video);
+
+          if (Hls.isSupported()) {
+              const hls = new Hls();
+              currentHls = hls; // เก็บ instance
+              hls.loadSource(url);
+              hls.attachMedia(video);
+              hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                  video.play().catch(e => console.error("Autoplay failed:", e));
+              });
+          } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+              // สำหรับ iOS/Safari
+              video.src = url;
+              video.play().catch(e => console.error("Autoplay failed:", e));
+          }
       }
     }
 
+    // Event Listener สำหรับการคลิกเลือกช่อง
     channels.forEach(c => {
       c.addEventListener("click", () => {
         const url = c.dataset.url;
-        loadStream(url);
+        const type = c.dataset.type || 'hls'; // กำหนด default เป็น 'hls'
+        loadStream(url, type);
+        
+        // เน้นช่องที่ถูกเลือก
         document.querySelectorAll(".channel").forEach(el => el.style.background = "");
         c.style.background = "rgba(124,58,237,0.3)";
       });
     });
 
+    // Event Listener สำหรับปุ่ม Full Screen
     fullscreenBtn.addEventListener("click", () => {
-      if (video.requestFullscreen) video.requestFullscreen();
+        // ตรวจสอบว่า Player ปัจจุบันเป็น Video หรือ Iframe
+        const currentPlayer = playerSlot.querySelector('#video') || playerSlot.querySelector('#embeddedPlayer');
+        if (currentPlayer && currentPlayer.requestFullscreen) {
+            currentPlayer.requestFullscreen();
+        } else if (playerSlot.requestFullscreen) {
+            playerSlot.requestFullscreen();
+        }
     });
 
-    // โหลดช่องแรก
-    if (channels.length > 0) loadStream(channels[0].dataset.url);
+    // โหลดช่องแรกเมื่อหน้าเว็บโหลดเสร็จ
+    if (channels.length > 0) {
+        const firstChannel = channels[0];
+        loadStream(firstChannel.dataset.url, firstChannel.dataset.type || 'hls');
+        firstChannel.style.background = "rgba(124,58,237,0.3)"; // เน้นช่องแรก
+    }
   </script>
 </body>
 </html>
