@@ -3,81 +3,72 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>IPTV Plus</title>
+  <title>Goolag - Live TV</title>
   <style>
     :root {
       --bg1:#0f172a; --bg2:#0b1220;
       --accent1:#7c3aed; --accent2:#06b6d4;
       --muted:rgba(255,255,255,0.7);
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Inter, sans-serif;
-      background: linear-gradient(180deg,var(--bg1),var(--bg2));
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:Inter,Arial,sans-serif;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#fff;min-height:100vh;display:flex;flex-direction:column;
     }
-    header {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    header{
+      background:rgba(255,255,255,0.05);
+      backdrop-filter:blur(10px);
+      padding:10px 20px;
+      display:flex;align-items:center;justify-content:space-between;
     }
-    header h1 { font-size: 20px; margin: 0; }
-    header button {
-      background: linear-gradient(90deg,var(--accent1),var(--accent2));
-      border: none; color: #fff; padding: 8px 16px;
-      border-radius: 8px; cursor: pointer; font-weight: bold;
+    header h1{font-size:20px;margin:0;}
+    header button{
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      border:none;color:#fff;padding:8px 16px;border-radius:8px;
+      cursor:pointer;font-weight:bold;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
-      gap: 16px;
-      padding: 20px;
-      flex: 1;
+    .filter{
+      padding:12px 20px;
+      background:rgba(255,255,255,0.03);
+      display:flex;align-items:center;gap:10px;
     }
-    .channel {
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: transform 0.3s;
-      text-align: center;
-      cursor: pointer;
+    select{
+      padding:8px 12px;
+      background:rgba(255,255,255,0.1);
+      color:#fff;border:none;border-radius:8px;
+      font-size:14px;outline:none;
     }
-    .channel:hover { transform: scale(1.05); }
-    .channel img {
-      width: 100%;
-      height: 100px;
-      object-fit: cover;
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:16px;padding:20px;flex:1;
     }
-    .channel h3 { margin: 10px 0; font-size: 16px; }
-    #playerContainer {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      z-index: 10;
+    .channel{
+      background:rgba(255,255,255,0.05);
+      border-radius:12px;overflow:hidden;
+      transition:transform 0.3s;text-align:center;cursor:pointer;
     }
-    video {
-      width: 90%; max-width: 900px;
-      border-radius: 12px;
-      background: #000;
+    .channel:hover{transform:scale(1.05);}
+    .channel img{width:100%;height:100px;object-fit:cover;}
+    .channel h3{margin:10px 0;font-size:15px;}
+
+    #playerContainer{
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.95);display:none;
+      justify-content:center;align-items:center;flex-direction:column;
+      z-index:10;
     }
-    #closeBtn {
-      margin-top: 10px;
-      background: #ef4444;
-      border: none; color: #fff; padding: 10px 20px;
-      border-radius: 8px; cursor: pointer;
+    #player{
+      width:90%;max-width:900px;aspect-ratio:16/9;
+      border-radius:12px;background:#000;
+    }
+    #closeBtn{
+      margin-top:10px;background:#ef4444;border:none;color:#fff;
+      padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:bold;
     }
   </style>
+  <script src="https://cdn.jwplayer.com/libraries/DbXZPMBQ.js"></script>
 </head>
 <body>
   <header>
@@ -85,13 +76,21 @@
     <button id="logoutBtn">ออกจากระบบ</button>
   </header>
 
-  <div class="grid" id="channelList">
-    <!-- ช่องทีวี -->
+  <div class="filter">
+    <label for="category">หมวดหมู่:</label>
+    <select id="category">
+      <option value="all">ทั้งหมด</option>
+      <option value="news">ข่าว</option>
+      <option value="entertainment">บันเทิง</option>
+      <option value="sports">กีฬา</option>
+      <option value="movies">ภาพยนตร์</option>
+    </select>
   </div>
 
-  <!-- Player Overlay -->
+  <div class="grid" id="channelList"></div>
+
   <div id="playerContainer">
-    <video id="player" controls autoplay></video>
+    <div id="player"></div>
     <button id="closeBtn">ปิด</button>
   </div>
 
@@ -100,11 +99,9 @@
     import { onAuthStateChanged, signOut } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    // ตรวจสอบการล็อกอิน
+    // ตรวจสอบการเข้าสู่ระบบ
     onAuthStateChanged(auth, user => {
-      if (!user) {
-        window.location.href = "login.html"; // ถ้าไม่ได้ล็อกอิน
-      }
+      if (!user) window.location.href = "login.html";
     });
 
     const logoutBtn = document.getElementById('logoutBtn');
@@ -113,37 +110,60 @@
       window.location.href = "login.html";
     };
 
-    // รายชื่อช่อง (ตัวอย่าง)
+    // รายชื่อช่อง (มีหมวด)
     const channels = [
-      { name: "MonoMAX1", logo: "https://www.img03.xyz/assets/img/ch_logo/Monomax_Sport01.png"", stream: "https://raw.githubusercontent.com/Goolag-Pink/AvA/refs/heads/main/Max/max1.m3u8" },
-      { name: "ช่อง 7", logo: "https://upload.wikimedia.org/wikipedia/en/5/5e/Channel_7HD_Thailand_Logo.png", stream: "https://example.com/ch7.m3u8" },
-      { name: "PPTV HD", logo: "https://upload.wikimedia.org/wikipedia/en/5/5a/PPTV_HD_Logo.png", stream: "https://example.com/pptv.m3u8" },
-      { name: "TNN16", logo: "https://upload.wikimedia.org/wikipedia/en/d/d7/TNN16_logo.png", stream: "https://example.com/tnn16.m3u8" }
+      { name: "ช่อง 3 HD", category: "entertainment", logo: "https://upload.wikimedia.org/wikipedia/en/8/83/Channel_3_Thailand_Logo.png", stream: "https://example.com/ch3.m3u8" },
+      { name: "ช่อง 7 HD", category: "entertainment", logo: "https://upload.wikimedia.org/wikipedia/en/5/5e/Channel_7HD_Thailand_Logo.png", stream: "https://example.com/ch7.m3u8" },
+      { name: "PPTV HD", category: "sports", logo: "https://upload.wikimedia.org/wikipedia/en/5/5a/PPTV_HD_Logo.png", stream: "https://example.com/pptv.m3u8" },
+      { name: "TNN16", category: "news", logo: "https://upload.wikimedia.org/wikipedia/en/d/d7/TNN16_logo.png", stream: "https://example.com/tnn16.m3u8" },
+      { name: "Workpoint TV", category: "entertainment", logo: "https://upload.wikimedia.org/wikipedia/en/5/53/Workpoint_TV_logo.png", stream: "https://example.com/workpoint.m3u8" },
+      { name: "MonoMax1", category: "sports", logo: "https://www.img03.xyz/assets/img/ch_logo/Monomax_Sport01.png", stream: "https://raw.githubusercontent.com/Goolag-Pink/AvA/refs/heads/main/Max/max1.m3u8" },
+      { name: "MONO29", category: "movies", logo: "https://upload.wikimedia.org/wikipedia/en/5/59/MONO_29_Logo.png", stream: "https://example.com/mono29.m3u8" },
     ];
 
     const channelList = document.getElementById("channelList");
-    channels.forEach(ch => {
-      const div = document.createElement("div");
-      div.className = "channel";
-      div.innerHTML = `
-        <img src="${ch.logo}" alt="${ch.name}">
-        <h3>${ch.name}</h3>
-      `;
-      div.onclick = () => openPlayer(ch.stream);
-      channelList.appendChild(div);
-    });
+    const categorySelect = document.getElementById("category");
+
+    function renderChannels(filter="all"){
+      channelList.innerHTML = "";
+      channels
+        .filter(ch => filter === "all" || ch.category === filter)
+        .forEach(ch => {
+          const div = document.createElement("div");
+          div.className = "channel";
+          div.innerHTML = `
+            <img src="${ch.logo}" alt="${ch.name}">
+            <h3>${ch.name}</h3>
+          `;
+          div.onclick = () => loadPlayer(ch.name, ch.stream);
+          channelList.appendChild(div);
+        });
+    }
+
+    categorySelect.onchange = () => renderChannels(categorySelect.value);
+    renderChannels();
 
     const playerContainer = document.getElementById("playerContainer");
-    const player = document.getElementById("player");
     const closeBtn = document.getElementById("closeBtn");
+    let jwPlayerInstance = null;
 
-    function openPlayer(url){
-      player.src = url;
+    function loadPlayer(title, streamUrl){
       playerContainer.style.display = "flex";
+      if(jwPlayerInstance){ jwPlayerInstance.remove(); }
+
+      jwPlayerInstance = jwplayer("player").setup({
+        file: streamUrl,
+        type: streamUrl.endsWith(".mpd") ? "dash" : "hls",
+        width: "100%",
+        aspectratio: "16:9",
+        autostart: true,
+        title: title,
+        preload: "auto",
+      });
     }
 
     closeBtn.onclick = () => {
-      player.pause();
+      if(jwPlayerInstance) jwPlayerInstance.remove();
       playerContainer.style.display = "none";
     };
   </script>
