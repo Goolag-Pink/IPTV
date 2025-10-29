@@ -1,8 +1,5 @@
 #EXTM3U
-#EXTINF:-1 group-title="Monomax" tvg-logo="https://www.andaman888th.online/wp-content/uploads/2020/11/monomax-1.png",Monomax 1
-http://line6.protv.cc:80/play/live.php?mac=00:1A:79:C4:2C:4B&stream=1660493&extension=ts
 
-#EXTM3U
 #EXTINF:-1 group-title="Monomax" tvg-logo="https://www.andaman888th.online/wp-content/uploads/2020/11/monomax-1.png",Monomax 1
 https://raw.githubusercontent.com/bestcommt2/bestcommt2.github.io/refs/heads/master/m3u8/monomax1.m3u8
 
@@ -32,6 +29,10 @@ https://raw.githubusercontent.com/bestcommt2/bestcommt2.github.io/refs/heads/mas
 https://raw.githubusercontent.com/Goolag-Pink/AvA/refs/heads/main/max4.m3u8
 
 -------------------------------------------
+
+
+#EXTINF:-1 group-title="True" tvg-logo="https://www.andaman888th.online/wp-content/uploads/2020/11/bein1.png,Bein 1
+http://goolag.duckdns.org/Bein1/index.m3u8
 
 #EXTINF:-1 group-title="ASTRO" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/5/5a/Astro_Football_%282024%29.png?20241118054903",ASTRO PREMIER LEAGUE
 https://anywhere.pwisetthon.com/http://nk.cdnnet.xyz:80/play/live.php?mac=00:1A:79:AD:B9:16&stream=918986&extension=ts
