@@ -1,0 +1,4 @@
+{
+    "cloudflare": true,
+    "cloudfront": true
+}
